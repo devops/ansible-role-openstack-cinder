@@ -1,0 +1,118 @@
+---
+# defaults file for ansible-role-openstack-cinder
+
+## openstack public config
+# openstack_controller_host: ""
+# openstack_keystone_auth_uri: ""
+# openstack_keystone_auth_url: ""
+# openstack_admin_vip: ""
+# openstack_public_vip: ""
+# openstack_internal_vip: ""
+# openstack_libvirt_secret_uuid: ""
+
+# cinder service
+cinder_service_region: RegionOne
+
+## cinder service v1
+cinder_service_name: cinder
+cinder_service_type: volume
+cinder_service_description: "OpenStack Block Storage"
+cinder_service_admin_url: "http://{{ openstack_admin_vip }}:8776/v1/%\\(tenant_id\\)s"
+cinder_service_internal_url: "http://{{ openstack_internal_vip }}:8776/v1/%\\(tenant_id\\)s"
+cinder_service_public_url: "http://{{ openstack_public_vip }}:8776/v1/%\\(tenant_id\\)s"
+
+## cinder service v2
+cinder_service_v2_name: cinderv2
+cinder_service_v2_type: volumev2
+cinder_service_v2_description: "OpenStack Block Storage v2"
+cinder_service_v2_admin_url: "http://{{ openstack_admin_vip }}:8776/v2/%\\(tenant_id\\)s"
+cinder_service_v2_internal_url: "http://{{ openstack_internal_vip }}:8776/v2/%\\(tenant_id\\)s"
+cinder_service_v2_public_url: "http://{{ openstack_public_vip }}:8776/v2/%\\(tenant_id\\)s"
+
+# cinder db
+cinder_db_host: "{{ openstack_db_host }}"
+cinder_db_name: "cinder"
+cinder_db_user: "cinder"
+cinder_db_password: "cinder"
+cinder_db_priv: "{{ cinder_db_name }}.*:ALL"
+
+# cinder rabbitmq
+cinder_rabbitmq_host: "{{ openstack_controller_host }}"
+cinder_rabbitmq_userid: 'cinder'
+cinder_rabbitmq_password: 'cinder'
+cinder_rabbitmq_vhost: '/cinder'
+
+# cinder keystone
+cinder_keystone_user: "cinder"
+cinder_keystone_password: "cinder"
+
+# cinder config
+cinder_rpc_backend: "rabbit"
+cinder_auth_strategy: "keystone"
+cinder_lock_path: "/var/lib/cinder/tmp"
+cinder_verbose: "True"
+cinder_my_ip: "{{ mgmt_ip }}"
+cinder_encryption_auth_url: "{{ openstack_keystone_auth_uri }}/v3"
+cinder_osapi_volume_listen: "{{ mgmt_ip }}"
+
+## cinder rabbitmq config
+cinder_rabbit_hosts: "{{ openstack_rabbit_hosts | default('{{ openstack_controller_host }}')}}"
+cinder_rabbit_retry_interval: 1
+cinder_rabbit_retry_backoff: 2
+cinder_rabbit_max_retries: 0
+cinder_rabbit_durable_queues: "true"
+cinder_rabbit_ha_queues: "true"
+
+## cinder ceph config
+cinder_rbd_pool: "cinder"
+cinder_rbd_ceph_conf: "/etc/ceph/ceph.conf"
+cinder_rbd_flatten_volume_from_snapsho: "false"
+cinder_rbd_max_clone_depth: 5
+cinder_rbd_store_chunk_size: 4
+cinder_rados_connect_timeout: -1
+cinder_glance_api_version: 2
+cinder_rbd_user: cinder
+cinder_rbd_secret_uuid: "{{ openstack_libvirt_secret_uuid }}"
+
+cinder_config:
+  - { section: "database", param: "connection", value: "mysql://{{ cinder_db_user }}:{{ cinder_db_password }}@{{ cinder_db_host }}/{{ cinder_db_name }}" }
+  - { section: "DEFAULT", param: "rpc_backend", value: "{{ cinder_rpc_backend }}" }
+  - { section: "DEFAULT", param: "auth_strategy", value: "{{ cinder_auth_strategy }}" }
+  - { section: "DEFAULT", param: "my_ip", value: "{{ cinder_my_ip }}" }
+  - { section: "DEFAULT", param: "verbose", value: "{{ cinder_verbose }}" }
+  - { section: "DEFAULT", param: "osapi_volume_listen", value: "{{ cinder_osapi_volume_listen }}" }
+  - { section: "keystone_authtoken", param: "auth_uri", value: "{{ openstack_keystone_auth_uri }}" }
+  - { section: "keystone_authtoken", param: "auth_url", value: "{{ openstack_keystone_auth_url }}" }
+  - { section: "keystone_authtoken", param: "auth_plugin", value: "password" }
+  - { section: "keystone_authtoken", param: "project_domain_id", value: "default" }
+  - { section: "keystone_authtoken", param: "user_domain_id", value: "default" }
+  - { section: "keystone_authtoken", param: "project_name", value: "service" }
+  - { section: "keystone_authtoken", param: "username", value: "{{ cinder_keystone_user }}" }
+  - { section: "keystone_authtoken", param: "password", value: "{{ cinder_keystone_password }}" }
+  - { section: "oslo_concurrency", param: "lock_path", value: "{{ cinder_lock_path }}" }
+  - { section: "keymgr", param: "encryption_auth_url", value: "{{ cinder_encryption_auth_url }}" }
+  - { section: "oslo_messaging_rabbit", param: "rabbit_userid", value: "{{ cinder_rabbitmq_userid }}" }
+  - { section: "oslo_messaging_rabbit", param: "rabbit_password", value: "{{ cinder_rabbitmq_password }}" }
+  - { section: "oslo_messaging_rabbit", param: "rabbit_virtual_host", value: "{{ cinder_rabbitmq_vhost }}" }
+  - { section: "oslo_messaging_rabbit", param: "rabbit_hosts", value: "{{ cinder_rabbit_hosts }}" }
+  - { section: "oslo_messaging_rabbit", param: "rabbit_retry_interval", value: "{{ cinder_rabbit_retry_interval }}" }
+  - { section: "oslo_messaging_rabbit", param: "rabbit_retry_backoff", value: "{{ cinder_rabbit_retry_backoff }}" }
+  - { section: "oslo_messaging_rabbit", param: "rabbit_max_retries", value: "{{ cinder_rabbit_max_retries }}" }
+  - { section: "oslo_messaging_rabbit", param: "rabbit_durable_queues", value: "{{ cinder_rabbit_durable_queues }}" }
+  - { section: "oslo_messaging_rabbit", param: "rabbit_ha_queues", value: "{{ cinder_rabbit_ha_queues }}" }
+
+cinder_ceph_config:
+  - { section: "DEFAULT", param: "enabled_backends", value: "ceph" }
+  - { section: "ceph", param: "volume_driver", value: "cinder.volume.drivers.rbd.RBDDriver" }
+  - { section: "ceph", param: "rbd_pool", value: "{{ cinder_rbd_pool }}" }
+  - { section: "ceph", param: "rbd_ceph_conf", value: "{{ cinder_rbd_ceph_conf }}" }
+  - { section: "ceph", param: "rbd_flatten_volume_from_snapshot", value: "{{ cinder_rbd_flatten_volume_from_snapsho }}" }
+  - { section: "ceph", param: "rbd_max_clone_depth", value: "{{ cinder_rbd_max_clone_depth }}" }
+  - { section: "ceph", param: "rbd_store_chunk_size", value: "{{ cinder_rbd_store_chunk_size }}" }
+  - { section: "ceph", param: "rados_connect_timeout", value: "{{ cinder_rados_connect_timeout }}" }
+  - { section: "ceph", param: "glance_api_version", value: "{{ cinder_glance_api_version }}" }
+  - { section: "ceph", param: "rbd_user", value: "{{ cinder_rbd_user }}" }
+  - { section: "ceph", param: "rbd_secret_uuid", value: "{{ cinder_rbd_secret_uuid }}" }
+
+cinder_nova_config:
+  - { section: "cinder", param: "os_region_name", value: "{{ cinder_service_region }}" }

@@ -1,0 +1,55 @@
+---
+# tasks file for openstack-cinder service setup
+
+- name: Create the service credentials for cinder.
+  shell: |
+    openstack user create --domain default --password "{{ cinder_keystone_password }}" "{{ cinder_keystone_user }}"
+    openstack role add --project service --user {{ cinder_keystone_user }} admin
+  environment:
+    - "{{ token_auth_env }}"
+
+- name: Create the service entity for cinder.
+  shell: |
+    openstack service create --name "{{ cinder_service_name }}" --description "{{ cinder_service_description }}" "{{ cinder_service_type }}"
+  environment:
+    - "{{ token_auth_env }}"
+
+- name: Create the service entity for cinder v2.
+  shell: |
+    openstack service create --name "{{ cinder_service_v2_name }}" --description "{{ cinder_service_v2_description }}" "{{ cinder_service_v2_type }}"
+  environment:
+    - "{{ token_auth_env }}"
+
+# Create the API endpoint for cinder.
+- name: Check if API endpoint exists for service "{{ cinder_service_type }}"
+  shell: "openstack endpoint list --service {{ cinder_service_type }}"
+  register: check_endpoint_result
+  environment:
+    - "{{ token_auth_env }}"
+  ignore_errors: True
+
+- name: "Specify API endpoints for {{ cinder_service_type }} service"
+  when: check_endpoint_result.rc == 0
+  shell: |
+    openstack endpoint create --region {{ cinder_service_region }} {{ cinder_service_type }} public {{ cinder_service_public_url }}
+    openstack endpoint create --region {{ cinder_service_region }} {{ cinder_service_type }} internal {{ cinder_service_internal_url }}
+    openstack endpoint create --region {{ cinder_service_region }} {{ cinder_service_type }} admin {{ cinder_service_admin_url }}
+  environment:
+    - "{{ token_auth_env }}"
+
+# Create the API endpoint for cinder v2.
+- name: Check if API endpoint exists for service "{{ cinder_service_v2_type }}"
+  shell: "openstack endpoint list --service {{ cinder_service_v2_type }}"
+  register: check_endpoint_v2_result
+  environment:
+    - "{{ token_auth_env }}"
+  ignore_errors: True
+
+- name: "Specify API endpoints for {{ cinder_service_v2_type }} service"
+  when: check_endpoint_v2_result.rc == 0
+  shell: |
+    openstack endpoint create --region {{ cinder_service_region }} {{ cinder_service_v2_type }} public {{ cinder_service_v2_public_url }}
+    openstack endpoint create --region {{ cinder_service_region }} {{ cinder_service_v2_type }} internal {{ cinder_service_v2_internal_url }}
+    openstack endpoint create --region {{ cinder_service_region }} {{ cinder_service_v2_type }} admin {{ cinder_service_v2_admin_url }}
+  environment:
+    - "{{ token_auth_env }}"

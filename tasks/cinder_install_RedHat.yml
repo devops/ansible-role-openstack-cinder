@@ -1,0 +1,8 @@
+---
+# tasks file for cinder install on RedHat
+
+- name: Install OpenStack cinder packages.
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items: "{{ cinder_packages }}"

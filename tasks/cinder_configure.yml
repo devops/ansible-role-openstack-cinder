@@ -1,0 +1,14 @@
+---
+- name: Configure cinder.
+  shell: |
+    openstack-config --set "{{ cinder_config_location }}" "{{ item.section }}" "{{ item.param }}" "{{ item.value }}"
+  with_items:
+    - "{{ cinder_config }}"
+
+- name: Configure cinder use ceph.
+  shell: |
+    openstack-config --set "{{ cinder_config_location }}" "{{ item.section }}" "{{ item.param }}" "{{ item.value }}"
+  with_items:
+    - "{{ cinder_ceph_config }}"
+  when:
+    - "{{ cinder_ceph_config }}"

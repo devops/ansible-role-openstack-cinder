@@ -1,0 +1,23 @@
+---
+# handlers file for ansible-role-openstack-cinder
+
+- name: restart cinder
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - "{{ cinder_system_service_name }}"
+
+- name: restart cinder volume
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - "{{ cinder_volume_system_service_name }}"
+
+- name: restart nova api
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - openstack-nova-api

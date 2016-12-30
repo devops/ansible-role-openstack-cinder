@@ -1,0 +1,16 @@
+---
+# vars file for Redhat
+
+cinder_packages:
+  - openstack-cinder
+  - python-cinderclient
+
+cinder_system_service_name:
+  - openstack-cinder-api
+  - openstack-cinder-scheduler
+
+cinder_volume_system_service_name:
+  - openstack-cinder-volume
+
+cinder_config_location: /etc/cinder/cinder.conf
+cinder_nova_config_location: /etc/nova/nova.conf
