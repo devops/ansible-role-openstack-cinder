@@ -3,7 +3,6 @@
 
 cinder_packages:
   - openstack-cinder
-  - python-cinderclient
 
 cinder_system_service_name:
   - openstack-cinder-api

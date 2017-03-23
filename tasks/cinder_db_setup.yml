@@ -2,6 +2,7 @@
 # tasks file for cinder DB Setup
 
 - name: DB sync for cinder.
-  shell: su -s /bin/sh -c "cinder-manage db sync" cinder
-  ignore_errors: True
-  run_once: True
+  command: cinder-manage db sync
+  become: yes
+  become_user: "{{ cinder_system_user_name }}"
+

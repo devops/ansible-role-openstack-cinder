@@ -20,4 +20,4 @@
     name: "{{ item }}"
     state: restarted
   with_items:
-    - openstack-nova-api
+    - "openstack-nova-api"

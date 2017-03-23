@@ -4,7 +4,7 @@
 - name: Create the service credentials for cinder.
   shell: |
     openstack user create --domain default --password "{{ cinder_keystone_password }}" "{{ cinder_keystone_user }}"
-    openstack role add --project service --user {{ cinder_keystone_user }} admin
+    openstack role add --project service --user "{{ cinder_keystone_user }}" admin
   environment:
     - "{{ token_auth_env }}"
 

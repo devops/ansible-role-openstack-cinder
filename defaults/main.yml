@@ -10,6 +10,8 @@
 # openstack_internal_vip: ""
 # openstack_libvirt_secret_uuid: ""
 
+cinder_system_user_name: cinder
+
 # cinder service
 cinder_service_region: RegionOne
 
@@ -50,10 +52,10 @@ cinder_keystone_password: "cinder"
 cinder_rpc_backend: "rabbit"
 cinder_auth_strategy: "keystone"
 cinder_lock_path: "/var/lib/cinder/tmp"
-cinder_verbose: "True"
 cinder_my_ip: "{{ mgmt_ip }}"
 cinder_encryption_auth_url: "{{ openstack_keystone_auth_uri }}/v3"
 cinder_osapi_volume_listen: "{{ mgmt_ip }}"
+cinder_memcached_servers: "{{ openstack_memcached_servers }}"
 
 ## cinder rabbitmq config
 cinder_rabbit_hosts: "{{ openstack_rabbit_hosts | default('{{ openstack_controller_host }}')}}"
@@ -75,17 +77,17 @@ cinder_rbd_user: cinder
 cinder_rbd_secret_uuid: "{{ openstack_libvirt_secret_uuid }}"
 
 cinder_config:
-  - { section: "database", param: "connection", value: "mysql://{{ cinder_db_user }}:{{ cinder_db_password }}@{{ cinder_db_host }}/{{ cinder_db_name }}" }
+  - { section: "database", param: "connection", value: "mysql+pymysql://{{ cinder_db_user }}:{{ cinder_db_password }}@{{ cinder_db_host }}/{{ cinder_db_name }}" }
   - { section: "DEFAULT", param: "rpc_backend", value: "{{ cinder_rpc_backend }}" }
   - { section: "DEFAULT", param: "auth_strategy", value: "{{ cinder_auth_strategy }}" }
   - { section: "DEFAULT", param: "my_ip", value: "{{ cinder_my_ip }}" }
-  - { section: "DEFAULT", param: "verbose", value: "{{ cinder_verbose }}" }
   - { section: "DEFAULT", param: "osapi_volume_listen", value: "{{ cinder_osapi_volume_listen }}" }
   - { section: "keystone_authtoken", param: "auth_uri", value: "{{ openstack_keystone_auth_uri }}" }
   - { section: "keystone_authtoken", param: "auth_url", value: "{{ openstack_keystone_auth_url }}" }
-  - { section: "keystone_authtoken", param: "auth_plugin", value: "password" }
-  - { section: "keystone_authtoken", param: "project_domain_id", value: "default" }
-  - { section: "keystone_authtoken", param: "user_domain_id", value: "default" }
+  - { section: "keystone_authtoken", param: "memcached_servers", value: "{{ cinder_memcached_servers }}" }
+  - { section: "keystone_authtoken", param: "auth_type", value: "password" }
+  - { section: "keystone_authtoken", param: "project_domain_name", value: "default" }
+  - { section: "keystone_authtoken", param: "user_domain_name", value: "default" }
   - { section: "keystone_authtoken", param: "project_name", value: "service" }
   - { section: "keystone_authtoken", param: "username", value: "{{ cinder_keystone_user }}" }
   - { section: "keystone_authtoken", param: "password", value: "{{ cinder_keystone_password }}" }

@@ -3,7 +3,12 @@
 
 # Variable setup.
 - name: Include OS-specific variables.
-  include_vars: "{{ ansible_os_family }}.yml"
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_os_family }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+  tags:
+    - always
 
 - include: cinder_service_setup.yml
   run_once: True
@@ -14,9 +19,14 @@
 
 # Configure tasks.
 - include: cinder_configure.yml
+  tags:
+    - cinder-config
 
 # DB tasks.
 - include: cinder_db_setup.yml
+  run_once: True
+  tags:
+    - cinder-db-setup
 
 # Configure nova
 - include: cinder_nova.yml
